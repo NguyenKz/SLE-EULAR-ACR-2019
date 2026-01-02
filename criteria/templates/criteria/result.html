@@ -29,6 +29,132 @@
     {% endif %}
   </div>
 
+  {% if result.eligible and result.domain_scores %}
+    <h2>Radar (Spider Chart) theo miền</h2>
+    {{ radar_axes|json_script:"radar-axes" }}
+    <div class="card">
+      <div class="cols" style="grid-template-columns: 1fr;">
+        <div>
+          <canvas id="radarCanvas" width="760" height="520" style="width:100%; max-width: 920px; height:auto;"></canvas>
+          <div class="muted small" style="margin-top:8px;">
+            Mỗi trục là một miền; vùng xanh là điểm đạt được (scaled theo điểm tối đa của miền).
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      (function () {
+        const el = document.getElementById("radar-axes");
+        const canvas = document.getElementById("radarCanvas");
+        if (!el || !canvas) return;
+        const axes = JSON.parse(el.textContent || "[]");
+        const ctx = canvas.getContext("2d");
+        if (!ctx || !axes.length) return;
+
+        // Handle HiDPI
+        const dpr = window.devicePixelRatio || 1;
+        const cssW = canvas.clientWidth || 760;
+        const cssH = Math.max(420, Math.round(cssW * 0.68));
+        canvas.style.width = cssW + "px";
+        canvas.style.height = cssH + "px";
+        canvas.width = Math.floor(cssW * dpr);
+        canvas.height = Math.floor(cssH * dpr);
+        ctx.scale(dpr, dpr);
+
+        const W = cssW, H = cssH;
+        const cx = W * 0.5, cy = H * 0.52;
+        const r = Math.min(W, H) * 0.33;
+        const N = axes.length;
+        const startAngle = -Math.PI / 2;
+
+        function polar(i, radius) {
+          const a = startAngle + (i * 2 * Math.PI) / N;
+          return { x: cx + Math.cos(a) * radius, y: cy + Math.sin(a) * radius };
+        }
+
+        function drawText(text, x, y, align) {
+          ctx.textAlign = align || "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(text, x, y);
+        }
+
+        // Background
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, W, H);
+
+        // Grid levels
+        const levels = 5;
+        for (let lv = 1; lv <= levels; lv++) {
+          const rr = (r * lv) / levels;
+          ctx.beginPath();
+          for (let i = 0; i < N; i++) {
+            const p = polar(i, rr);
+            if (i === 0) ctx.moveTo(p.x, p.y);
+            else ctx.lineTo(p.x, p.y);
+          }
+          ctx.closePath();
+          ctx.strokeStyle = "#e5e7eb";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+
+        // Axes lines + labels
+        ctx.font = "12px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial";
+        for (let i = 0; i < N; i++) {
+          const p = polar(i, r);
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(p.x, p.y);
+          ctx.strokeStyle = "#e5e7eb";
+          ctx.stroke();
+
+          const label = String(axes[i].label || axes[i].id || "");
+          // Shorten label to avoid overlap
+          const short = label.replace(/\s+\(.*\)$/, "");
+          const lp = polar(i, r + 18);
+          const align = lp.x < cx - 10 ? "right" : lp.x > cx + 10 ? "left" : "center";
+          ctx.fillStyle = "#111";
+          drawText(short, lp.x, lp.y, align);
+        }
+
+        // Data polygon
+        ctx.beginPath();
+        for (let i = 0; i < N; i++) {
+          const max = Math.max(1, Number(axes[i].max || 1));
+          const val = Math.max(0, Number(axes[i].value || 0));
+          const rr = (val / max) * r;
+          const p = polar(i, rr);
+          if (i === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        }
+        ctx.closePath();
+        ctx.fillStyle = "rgba(37, 99, 235, 0.18)";
+        ctx.strokeStyle = "rgba(37, 99, 235, 0.95)";
+        ctx.lineWidth = 2;
+        ctx.fill();
+        ctx.stroke();
+
+        // Points + value labels (hide zeros to avoid clutter in the center)
+        ctx.font = "11px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial";
+        for (let i = 0; i < N; i++) {
+          const max = Math.max(1, Number(axes[i].max || 1));
+          const val = Math.max(0, Number(axes[i].value || 0));
+          if (val === 0) continue;
+          const rr = (val / max) * r;
+          const p = polar(i, rr);
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(37, 99, 235, 1)";
+          ctx.fill();
+          ctx.fillStyle = "#334155";
+          const tp = polar(i, rr + 12);
+          drawText(`${val}/${max}`, tp.x, tp.y, "center");
+        }
+      })();
+    </script>
+  {% endif %}
+
   {% if result.domain_scores %}
     <h2>Chi tiết theo miền (Max-in-Domain)</h2>
     <div class="grid">

@@ -25,6 +25,34 @@ def _domain_blocks(form: CriteriaForm):
     return blocks
 
 
+def _radar_payload(result):
+    """
+    Build radar payload: one axis per domain, with value and max points.
+    """
+    domains = list(get_domains())
+    max_by_id = {}
+    label_by_id = {}
+    for d in domains:
+        label_by_id[d.id] = d.label
+        max_by_id[d.id] = max((c.points for c in d.criteria), default=0) if d.max_in_domain else (d.criteria[0].points if d.criteria else 0)
+
+    value_by_id = {}
+    for ds in getattr(result, "domain_scores", []) or []:
+        value_by_id[ds.domain_id] = ds.awarded_points
+
+    axes = []
+    for d in domains:
+        axes.append(
+            {
+                "id": d.id,
+                "label": label_by_id[d.id],
+                "value": int(value_by_id.get(d.id, 0)),
+                "max": int(max_by_id.get(d.id, 0)),
+            }
+        )
+    return axes
+
+
 @require_http_methods(["GET", "POST"])
 def index(request: HttpRequest):
     if request.method == "POST":
@@ -41,6 +69,7 @@ def index(request: HttpRequest):
                     "form": form,
                     "result": result,
                     "domain_blocks": _domain_blocks(form),
+                    "radar_axes": _radar_payload(result),
                 },
             )
     else:
