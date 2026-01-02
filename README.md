@@ -17,12 +17,30 @@ docker compose up --build
 
 Mở `http://localhost:8000/`.
 
+### Postgres (Docker)
+
+Khi chạy bằng `docker compose`, hệ thống sẽ dùng **PostgreSQL** (service `db`) và tự chạy `migrate` trước khi start server.
+
 ## Chạy local (không Docker)
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+python manage.py runserver
+```
+
+### Postgres (local – optional)
+
+Nếu muốn dùng Postgres khi chạy local, export các biến môi trường:
+
+```bash
+export POSTGRES_HOST=127.0.0.1
+export POSTGRES_PORT=5432
+export POSTGRES_DB=sleweb
+export POSTGRES_USER=sleweb
+export POSTGRES_PASSWORD=sleweb
+python manage.py migrate
 python manage.py runserver
 ```
 

@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -74,12 +75,30 @@ WSGI_APPLICATION = 'sleweb.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+def _env(name: str, default: str | None = None) -> str | None:
+    v = os.getenv(name)
+    return v if v not in (None, "") else default
+
+
+if _env("POSTGRES_HOST"):
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": _env("POSTGRES_DB", "sleweb"),
+            "USER": _env("POSTGRES_USER", "sleweb"),
+            "PASSWORD": _env("POSTGRES_PASSWORD", "sleweb"),
+            "HOST": _env("POSTGRES_HOST", "localhost"),
+            "PORT": _env("POSTGRES_PORT", "5432"),
+        }
     }
-}
+else:
+    # Fallback for local dev without Postgres
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 
 # Password validation

@@ -14,6 +14,7 @@
           "input": {
             "ana_positive": true,
             "selections": [
+              "renal_biopsy_class_ii_or_v",
               "renal_biopsy_class_iii_or_iv"
             ]
           },
@@ -59,8 +60,7 @@
           },
           "expected": {
             "domain_id": "complement",
-            "domain_score": 4,
-            "total_score": 4
+            "domain_score": 4
           }
         },
         {
@@ -76,8 +76,7 @@
           },
           "expected": {
             "domain_id": "antiphospholipid",
-            "domain_score": 2,
-            "total_score": 2
+            "domain_score": 2
           }
         }
       ]
@@ -141,9 +140,9 @@
             ]
           },
           "expected": {
+            "total_score": 5,
             "domain_id": "neuropsychiatric",
-            "domain_score": 5,
-            "total_score": 5
+            "domain_score": 5
           }
         }
       ]
@@ -161,23 +160,208 @@
             "selections": []
           },
           "expected": {
-            "total_score": 0,
-            "meets_classification": false,
-            "risk_tier": "Chưa đủ tiêu chuẩn"
+            "total_score": 0
           }
         },
         {
           "id": "TC-17",
           "description": "Tính toàn vẹn của Docker Container",
           "kind": "manual",
-          "action": "docker-compose up",
-          "expected": {
-            "status": "All services (Django, Postgres, Redis) running"
+          "technical_logic": "Đảm bảo tính tái lập của môi trường nghiên cứu thông qua ảo hóa[cite: 144, 146].",
+          "action": "docker-compose up"
+        }
+      ]
+    },
+    {
+      "category": "6. Kiểm tra Da-niêm mạc, Thanh mạc, Hiến pháp (Mucocutaneous/Serosal/Constitutional)",
+      "cases": [
+        {
+          "id": "TC-18",
+          "description": "Max-in-Domain Da-niêm mạc: ưu tiên Lupus da cấp tính (6 điểm)",
+          "kind": "auto",
+          "medical_rationale": "Trong cùng miền Da-niêm mạc chỉ tính điểm cao nhất; Lupus da cấp tính có trọng số 6 điểm nên được chọn (Max-in-Domain).",
+          "warnings": [
+            "expected_output.domain_score có nhưng không suy ra được domain_id."
+          ],
+          "input": {
+            "ana_positive": true,
+            "selections": [
+              "acute_cutaneous",
+              "nonscarring_alopecia",
+              "subacute_cutaneous_or_discoid"
+            ]
           },
-          "technical_logic": "Đảm bảo tính tái lập của môi trường nghiên cứu thông qua ảo hóa[cite: 144, 146]."
+          "expected": {
+            "total_score": 6,
+            "domain_score": 6
+          }
+        },
+        {
+          "id": "TC-19",
+          "description": "Max-in-Domain Thanh mạc: ưu tiên Viêm màng ngoài tim cấp (6 điểm) hơn tràn dịch (5 điểm)",
+          "kind": "auto",
+          "medical_rationale": "Miền Thanh mạc áp dụng Max-in-Domain, chọn điểm cao nhất là 6.",
+          "warnings": [
+            "expected_output.domain_score có nhưng không suy ra được domain_id."
+          ],
+          "input": {
+            "ana_positive": true,
+            "selections": [
+              "acute_pericarditis",
+              "pleural_or_pericardial_effusion"
+            ]
+          },
+          "expected": {
+            "total_score": 6,
+            "domain_score": 6
+          }
+        },
+        {
+          "id": "TC-20",
+          "description": "Miền Hiến pháp: Sốt (2 điểm) đơn trị",
+          "kind": "auto",
+          "medical_rationale": "Miền Hiến pháp chỉ có tiêu chí Sốt, tính 2 điểm.",
+          "warnings": [
+            "expected_output.domain_score có nhưng không suy ra được domain_id."
+          ],
+          "input": {
+            "ana_positive": true,
+            "selections": [
+              "fever"
+            ]
+          },
+          "expected": {
+            "total_score": 2,
+            "domain_score": 2
+          }
+        }
+      ]
+    },
+    {
+      "category": "7. Kiểm tra Huyết học, Bổ thể, Kháng thể đặc hiệu (Hematologic/Complement/SLE-specific Abs)",
+      "cases": [
+        {
+          "id": "TC-21",
+          "description": "Max-in-Domain Huyết học: Giảm tiểu cầu (4) ưu tiên hơn Giảm bạch cầu (3)",
+          "kind": "auto",
+          "medical_rationale": "Trong miền Huyết học chỉ lấy điểm cao nhất (4).",
+          "warnings": [
+            "expected_output.domain_score có nhưng không suy ra được domain_id."
+          ],
+          "input": {
+            "ana_positive": true,
+            "selections": [
+              "leukopenia",
+              "thrombocytopenia"
+            ]
+          },
+          "expected": {
+            "total_score": 4,
+            "domain_score": 4
+          }
+        },
+        {
+          "id": "TC-22",
+          "description": "Bổ thể mức nhẹ: chỉ giảm C3 hoặc C4 (3 điểm)",
+          "kind": "auto",
+          "medical_rationale": "Giảm C3 hoặc C4 tính 3 điểm; nếu giảm cả hai mới là 4 điểm.",
+          "input": {
+            "ana_positive": true,
+            "selections": [
+              "low_c3_or_c4"
+            ]
+          },
+          "expected": {
+            "total_score": 3,
+            "domain_id": "complement",
+            "domain_score": 3
+          }
+        },
+        {
+          "id": "TC-23",
+          "description": "Kháng thể đặc hiệu SLE: Anti-dsDNA hoặc Anti-Sm (6 điểm)",
+          "kind": "auto",
+          "medical_rationale": "Miền kháng thể đặc hiệu SLE là đơn trị: chỉ cần 1 trong 2 dương tính được 6 điểm.",
+          "warnings": [
+            "expected_output.domain_score có nhưng không suy ra được domain_id."
+          ],
+          "input": {
+            "ana_positive": true,
+            "selections": [
+              "anti_dsdna_or_anti_sm"
+            ]
+          },
+          "expected": {
+            "total_score": 6,
+            "domain_score": 6
+          }
+        }
+      ]
+    },
+    {
+      "category": "8. Kiểm tra ngưỡng phân loại & Ominous + ANA gate",
+      "cases": [
+        {
+          "id": "TC-24",
+          "description": "Đúng ngưỡng phân loại 10 điểm (6+2+2): Viêm khớp + sốt + APL",
+          "kind": "auto",
+          "medical_rationale": "Tổng điểm đạt 10 là đủ tiêu chuẩn phân loại SLE.",
+          "input": {
+            "ana_positive": true,
+            "selections": [
+              "antiphospholipid_any",
+              "fever",
+              "joint_involvement"
+            ]
+          },
+          "expected": {
+            "total_score": 10,
+            "meets_classification": true,
+            "risk_tier": "SLE Tiêu chuẩn"
+          }
+        },
+        {
+          "id": "TC-25",
+          "description": "Đúng ngưỡng Ominous 20 điểm (10+6+2+2): Thận III/IV + viêm khớp + APL + sốt",
+          "kind": "auto",
+          "medical_rationale": "Ngưỡng 20 được xem là nhóm nguy cơ cao (Ominous) trong mô hình phân tầng.",
+          "input": {
+            "ana_positive": true,
+            "selections": [
+              "antiphospholipid_any",
+              "fever",
+              "joint_involvement",
+              "renal_biopsy_class_ii_or_v",
+              "renal_biopsy_class_iii_or_iv"
+            ]
+          },
+          "expected": {
+            "total_score": 20,
+            "meets_classification": true,
+            "risk_tier": "SLE Nguy cơ cao / Ominous"
+          }
+        },
+        {
+          "id": "TC-26",
+          "description": "ANA âm tính: dù có nhiều tiêu chí vẫn không đủ điều kiện tính điểm",
+          "kind": "auto",
+          "medical_rationale": "Theo tiêu chuẩn EULAR/ACR 2019, ANA là điều kiện đầu vào; ANA âm tính thì dừng, không cộng điểm.",
+          "input": {
+            "ana_positive": false,
+            "selections": [
+              "acute_cutaneous",
+              "joint_involvement",
+              "renal_biopsy_class_ii_or_v",
+              "renal_biopsy_class_iii_or_iv"
+            ]
+          },
+          "expected": {
+            "total_score": 0,
+            "meets_classification": false,
+            "risk_tier": "Chưa đủ tiêu chuẩn"
+          }
         }
       ]
     }
   ]
 }
-

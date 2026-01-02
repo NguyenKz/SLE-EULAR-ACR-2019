@@ -67,6 +67,11 @@ def _map_selected_criteria_to_ids(selected: List[str]) -> Tuple[Dict[str, bool],
         if "effusion" in t:
             add("pleural_or_pericardial_effusion")
 
+    # Constitutional
+    for t in tokens:
+        if "fever" in t or "sốt" in t:
+            add("fever")
+
     # Hematologic
     for t in tokens:
         if "leukopenia" in t:
@@ -112,6 +117,10 @@ def _map_selected_criteria_to_ids(selected: List[str]) -> Tuple[Dict[str, bool],
     # Antiphospholipid (any positive => 2 points)
     if any("anti-cardiolipin" in t for t in tokens) or any("lupus anticoagulant" in t for t in tokens) or any("β2" in t or "b2gp1" in t for t in tokens):
         add("antiphospholipid_any")
+
+    # SLE-specific antibodies
+    if any("anti-dsdna" in t for t in tokens) or any("anti-sm" in t for t in tokens) or any("anti sm" in t for t in tokens):
+        add("anti_dsdna_or_anti_sm")
 
     if not selections and selected:
         warnings.append("Không map được selected_criteria -> criterion IDs (cần chuẩn hóa JSON).")

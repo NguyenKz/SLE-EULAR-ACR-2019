@@ -162,6 +162,170 @@
                     "technical_logic": "Đảm bảo tính tái lập của môi trường nghiên cứu thông qua ảo hóa[cite: 144, 146]."
                 }
             ]
+        },
+        {
+            "category": "6. Kiểm tra Da-niêm mạc, Thanh mạc, Hiến pháp (Mucocutaneous/Serosal/Constitutional)",
+            "cases": [
+                {
+                    "id": "TC-18",
+                    "description": "Max-in-Domain Da-niêm mạc: ưu tiên Lupus da cấp tính (6 điểm)",
+                    "input": {
+                        "ana_status": true,
+                        "selected_criteria": [
+                            "Alopecia (2 points)",
+                            "Discoid lupus (4 points)",
+                            "Acute cutaneous lupus (6 points)"
+                        ]
+                    },
+                    "expected_output": {
+                        "domain_score": 6,
+                        "total_score": 6
+                    },
+                    "medical_rationale": "Trong cùng miền Da-niêm mạc chỉ tính điểm cao nhất; Lupus da cấp tính có trọng số 6 điểm nên được chọn (Max-in-Domain)."
+                },
+                {
+                    "id": "TC-19",
+                    "description": "Max-in-Domain Thanh mạc: ưu tiên Viêm màng ngoài tim cấp (6 điểm) hơn tràn dịch (5 điểm)",
+                    "input": {
+                        "ana_status": true,
+                        "selected_criteria": [
+                            "Pleural/pericardial effusion (5 points)",
+                            "Acute pericarditis (6 points)"
+                        ]
+                    },
+                    "expected_output": {
+                        "domain_score": 6,
+                        "total_score": 6
+                    },
+                    "medical_rationale": "Miền Thanh mạc áp dụng Max-in-Domain, chọn điểm cao nhất là 6."
+                },
+                {
+                    "id": "TC-20",
+                    "description": "Miền Hiến pháp: Sốt (2 điểm) đơn trị",
+                    "input": {
+                        "ana_status": true,
+                        "selected_criteria": [
+                            "Fever (2 points)"
+                        ]
+                    },
+                    "expected_output": {
+                        "domain_score": 2,
+                        "total_score": 2
+                    },
+                    "medical_rationale": "Miền Hiến pháp chỉ có tiêu chí Sốt, tính 2 điểm."
+                }
+            ]
+        },
+        {
+            "category": "7. Kiểm tra Huyết học, Bổ thể, Kháng thể đặc hiệu (Hematologic/Complement/SLE-specific Abs)",
+            "cases": [
+                {
+                    "id": "TC-21",
+                    "description": "Max-in-Domain Huyết học: Giảm tiểu cầu (4) ưu tiên hơn Giảm bạch cầu (3)",
+                    "input": {
+                        "ana_status": true,
+                        "selected_criteria": [
+                            "Leukopenia (3 points)",
+                            "Thrombocytopenia (4 points)"
+                        ]
+                    },
+                    "expected_output": {
+                        "domain_score": 4,
+                        "total_score": 4
+                    },
+                    "medical_rationale": "Trong miền Huyết học chỉ lấy điểm cao nhất (4)."
+                },
+                {
+                    "id": "TC-22",
+                    "description": "Bổ thể mức nhẹ: chỉ giảm C3 hoặc C4 (3 điểm)",
+                    "input": {
+                        "ana_status": true,
+                        "selected_criteria": [
+                            "Low C3 (3 points)"
+                        ]
+                    },
+                    "expected_output": {
+                        "domain_score": 3,
+                        "total_score": 3
+                    },
+                    "medical_rationale": "Giảm C3 hoặc C4 tính 3 điểm; nếu giảm cả hai mới là 4 điểm."
+                },
+                {
+                    "id": "TC-23",
+                    "description": "Kháng thể đặc hiệu SLE: Anti-dsDNA hoặc Anti-Sm (6 điểm)",
+                    "input": {
+                        "ana_status": true,
+                        "selected_criteria": [
+                            "Anti-dsDNA (6 points)"
+                        ]
+                    },
+                    "expected_output": {
+                        "domain_score": 6,
+                        "total_score": 6
+                    },
+                    "medical_rationale": "Miền kháng thể đặc hiệu SLE là đơn trị: chỉ cần 1 trong 2 dương tính được 6 điểm."
+                }
+            ]
+        },
+        {
+            "category": "8. Kiểm tra ngưỡng phân loại & Ominous + ANA gate",
+            "cases": [
+                {
+                    "id": "TC-24",
+                    "description": "Đúng ngưỡng phân loại 10 điểm (6+2+2): Viêm khớp + sốt + APL",
+                    "input": {
+                        "ana_status": true,
+                        "selected_criteria": [
+                            "Arthritis (6 points)",
+                            "Fever (2 points)",
+                            "Anti-cardiolipin (2 points)"
+                        ]
+                    },
+                    "expected_output": {
+                        "total_score": 10,
+                        "classification": "SLE Classified",
+                        "risk_level": "Moderate / Standard"
+                    },
+                    "medical_rationale": "Tổng điểm đạt 10 là đủ tiêu chuẩn phân loại SLE."
+                },
+                {
+                    "id": "TC-25",
+                    "description": "Đúng ngưỡng Ominous 20 điểm (10+6+2+2): Thận III/IV + viêm khớp + APL + sốt",
+                    "input": {
+                        "ana_status": true,
+                        "selected_criteria": [
+                            "Lupus Nephritis Class III or IV (10 points)",
+                            "Arthritis (6 points)",
+                            "Anti-cardiolipin (2 points)",
+                            "Fever (2 points)"
+                        ]
+                    },
+                    "expected_output": {
+                        "total_score": 20,
+                        "classification": "SLE Classified",
+                        "risk_level": "High / Ominous"
+                    },
+                    "medical_rationale": "Ngưỡng 20 được xem là nhóm nguy cơ cao (Ominous) trong mô hình phân tầng."
+                },
+                {
+                    "id": "TC-26",
+                    "description": "ANA âm tính: dù có nhiều tiêu chí vẫn không đủ điều kiện tính điểm",
+                    "input": {
+                        "ana_status": false,
+                        "selected_criteria": [
+                            "Lupus Nephritis Class III or IV (10 points)",
+                            "Arthritis (6 points)",
+                            "Acute cutaneous lupus (6 points)"
+                        ]
+                    },
+                    "expected_output": {
+                        "total_score": 0,
+                        "classification": "Not Classified",
+                        "risk_level": "Low"
+                    },
+                    "medical_rationale": "Theo tiêu chuẩn EULAR/ACR 2019, ANA là điều kiện đầu vào; ANA âm tính thì dừng, không cộng điểm."
+                }
+            ]
         }
     ]
 }
