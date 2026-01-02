@@ -1,0 +1,107 @@
+{% extends "criteria/base.html" %}
+
+{% block title %}Cơ sở lý thuyết – EULAR/ACR 2019{% endblock %}
+
+{% block content %}
+  <h1>Cơ sở lý thuyết &amp; thông tin chi tiết – SLE EULAR/ACR 2019</h1>
+  <p class="muted">
+    Trang này tóm tắt logic tiêu chuẩn phân loại EULAR/ACR 2019 và cách hệ thống đang tính điểm (ANA gate, Max-in-Domain, ngưỡng 10 và phân tầng nguy cơ 20).
+  </p>
+
+  <h2>1) Mục tiêu của EULAR/ACR 2019</h2>
+  <div class="card">
+    <p>
+      EULAR/ACR 2019 là <strong>tiêu chuẩn phân loại</strong> (classification criteria) cho SLE,
+      được xây dựng theo mô hình <strong>tính điểm có trọng số</strong> nhằm cải thiện độ nhạy/độ đặc hiệu so với các bộ trước đó.
+    </p>
+    <p class="muted small">
+      Nếu link PDF chính không truy cập được, bạn có thể dùng các nguồn thay thế dưới đây:
+      <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6827566/pdf/nihms-1029532.pdf">eScholarship (PDF)</a>,
+      <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6827566/">PMC (bài gốc)</a>,
+      <a href="https://saraa.co.za/wp-content/uploads/2020/05/acr-eular-classification-criteria-for-sle-2019.pdf">Saraa (PDF mirror)</a>,
+      và bảng tóm tắt: <a href="https://www.merckmanuals.com/professional/multimedia/table/eularacr-criteria-or-the-classification-of-systemic-lupus-erythematosus">Merck Manual</a>.
+    </p>
+  </div>
+
+  <h2>2) Tiêu chuẩn đầu vào (Entry criterion): ANA</h2>
+  <div class="card">
+    <p>
+      Điều kiện bắt buộc để bắt đầu tính điểm là <strong>ANA dương tính</strong>.
+      Nếu ANA âm tính, hệ thống sẽ dừng và trả về “không phân loại SLE theo EULAR/ACR 2019”.
+    </p>
+    <p class="muted small">
+      Lưu ý: một tỷ lệ nhỏ bệnh nhân SLE có thể ANA âm tính; do đó kết quả “không đủ điều kiện” không loại trừ hoàn toàn SLE trong lâm sàng.
+    </p>
+  </div>
+
+  <h2>3) Cấu trúc miền (Domains) &amp; quy tắc Max-in-Domain</h2>
+  <div class="card">
+    <p>
+      Sau khi đạt ANA(+), bệnh nhân được đánh giá theo các <strong>miền lâm sàng</strong> và <strong>miền miễn dịch</strong>.
+      <strong>Trong mỗi miền, không cộng dồn điểm</strong>; chỉ lấy <strong>tiêu chí có điểm cao nhất</strong> (Max-in-Domain).
+    </p>
+    <p class="muted small">
+      Điều này giúp tránh “đếm trùng” các biểu hiện cùng nhóm và phản ánh mức độ nặng nhất trong từng miền.
+    </p>
+  </div>
+
+  <h2>4) Bảng miền/tiêu chí đang dùng trong hệ thống</h2>
+  <div class="grid">
+    {% for d in domains %}
+      <section class="domain">
+        <div class="domain-title">
+          <strong>{{ d.label }}</strong>
+          <span class="pill">{% if d.max_in_domain %}Chọn MAX trong miền{% else %}Đơn trị{% endif %}</span>
+        </div>
+        {% if d.note %}
+          <div class="note">{{ d.note }}</div>
+        {% endif %}
+        <div class="small">
+          <ul>
+            {% for c in d.criteria %}
+              <li>{{ c.label }} — <strong>{{ c.points }}</strong> điểm</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </section>
+    {% endfor %}
+  </div>
+
+  <h2>5) Ngưỡng phân loại &amp; phân tầng nguy cơ</h2>
+  <div class="card">
+    <p>
+      - <strong>Ngưỡng phân loại</strong>: tổng điểm <strong>≥ 10</strong> là điều kiện đủ để phân loại SLE theo EULAR/ACR 2019.<br/>
+      - <strong>Phân tầng nguy cơ</strong> (theo báo cáo):<br/>
+        <span class="mono">Score &lt; 10</span> (chưa đủ tiêu chuẩn), <span class="mono">10 ≤ Score &lt; 20</span> (SLE tiêu chuẩn),
+        <span class="mono">Score ≥ 20</span> (SLE nguy cơ cao / “Ominous”).
+    </p>
+    <p class="muted small">
+      Khái niệm “Ominosity” và ngưỡng 20 được thảo luận trong nghiên cứu hậu kiểm/đoàn hệ:
+      <a href="https://pubmed.ncbi.nlm.nih.gov/33452003/">PubMed: defining ominosity</a>,
+      và bài tổng quan ứng dụng điểm số cho mức độ nặng: <a href="https://www.the-rheumatologist.org/article/using-the-2019-eular-acr-classification-criteria-to-predict-disease-severity-in-sle/">The Rheumatologist</a>.
+    </p>
+  </div>
+
+  <h2>6) Ghi chú quan trọng khi sử dụng</h2>
+  <div class="card">
+    <ul>
+      <li><strong>Tiêu chuẩn phân loại ≠ chẩn đoán</strong>: kết quả hỗ trợ ra quyết định, không thay thế bác sĩ.</li>
+      <li><strong>Chất lượng dữ liệu đầu vào</strong>: điểm phụ thuộc vào định nghĩa/điều kiện của từng tiêu chí (lâm sàng/xét nghiệm).</li>
+      <li><strong>Giới hạn ANA gate</strong>: ANA âm tính vẫn có thể gặp trong một số trường hợp đặc biệt.</li>
+    </ul>
+  </div>
+
+  <h2>7) Tài liệu tham khảo</h2>
+  <div class="card small">
+    <ol>
+      <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6827566/">PMC: 2019 EULAR/ACR criteria – bài gốc/điểm số</a></li>
+      <li><a href="https://escholarship.org/content/qt8xx2q1vs/qt8xx2q1vs.pdf">eScholarship (PDF): 2019 EULAR/ACR Classification Criteria</a></li>
+      <li><a href="https://saraa.co.za/wp-content/uploads/2020/05/acr-eular-classification-criteria-for-sle-2019.pdf">Saraa (PDF mirror): ACR/EULAR classification criteria for SLE 2019</a></li>
+      <li><a href="https://www.merckmanuals.com/professional/multimedia/table/eularacr-criteria-or-the-classification-of-systemic-lupus-erythematosus">Merck Manual: bảng tóm tắt điểm số</a></li>
+      <li><a href="https://pubmed.ncbi.nlm.nih.gov/33452003/">PubMed: defining ominosity</a></li>
+      <li><a href="https://www.the-rheumatologist.org/article/using-the-2019-eular-acr-classification-criteria-to-predict-disease-severity-in-sle/">The Rheumatologist: dùng tiêu chuẩn để dự đoán mức độ nặng</a></li>
+    </ol>
+  </div>
+{% endblock %}
+
+

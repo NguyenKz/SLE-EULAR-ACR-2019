@@ -1,0 +1,240 @@
+{% extends "criteria/base.html" %}
+
+{% block title %}Test case – EULAR/ACR 2019{% endblock %}
+
+{% block content %}
+  <h1>Test case hệ thống</h1>
+  <p class="muted">
+    Nguồn dữ liệu: <span class="mono">{{ file_path }}</span>
+  </p>
+
+  {% if error %}
+    <div class="card">
+      <p class="err"><strong>Lỗi:</strong> {{ error }}</p>
+    </div>
+  {% else %}
+    <div class="card">
+      <p>
+        <strong>Test suite:</strong> {{ data.test_suite }}<br/>
+        <strong>Version:</strong> {{ data.version }}
+      </p>
+      <p class="muted small">
+        Gợi ý: click vào từng case để xem input/expected/rationale. Bạn cũng có thể chạy runner để so sánh với kết quả engine.
+      </p>
+      <div class="actions">
+        <button type="button" id="runAllBtn">Chạy tất cả</button>
+        <a class="mono" href="{% url 'criteria:test_cases_normalized_json' %}">Download normalized JSON</a>
+        <span id="summary" class="muted small"></span>
+      </div>
+    </div>
+
+    <h2>Danh sách theo nhóm</h2>
+    <div class="grid">
+      {% for group in data.test_cases %}
+        <section class="domain">
+          <div class="domain-title">
+            <strong>{{ group.category }}</strong>
+            <span class="pill">{{ group.cases|length }} case</span>
+          </div>
+
+          <div class="small">
+            {% for tc in group.cases %}
+              <details style="margin-top:10px;">
+                <summary style="cursor:pointer;">
+                  <strong class="mono">{{ tc.id }}</strong> — {{ tc.description }}
+                </summary>
+                <div style="margin-top:10px;">
+                  <div class="actions" style="margin-top:0;">
+                    <button type="button" class="runOneBtn" data-id="{{ tc.id }}">Chạy</button>
+                    <span class="pill neutral" id="status-{{ tc.id }}">Chưa chạy</span>
+                  </div>
+                  <div class="card small" style="background:#fff; display:none;" id="io-{{ tc.id }}"></div>
+                  <div class="card small" style="background:#fff; display:none;" id="diffs-{{ tc.id }}"></div>
+
+                  {% if tc.input %}
+                    <div class="card" style="background:#fff;">
+                      <div><strong>Input</strong></div>
+                      <ul>
+                        {% for k, v in tc.input.items %}
+                          <li><span class="mono">{{ k }}</span>: {{ v }}</li>
+                        {% endfor %}
+                      </ul>
+                    </div>
+                  {% endif %}
+
+                  {% if tc.action %}
+                    <div class="card" style="background:#fff;">
+                      <div><strong>Action</strong></div>
+                      <div class="mono">{{ tc.action }}</div>
+                    </div>
+                  {% endif %}
+
+                  {% if tc.expected_output %}
+                    <div class="card" style="background:#fff; margin-top:10px;">
+                      <div><strong>Expected output</strong></div>
+                      <ul>
+                        {% for k, v in tc.expected_output.items %}
+                          <li><span class="mono">{{ k }}</span>: {{ v }}</li>
+                        {% endfor %}
+                      </ul>
+                    </div>
+                  {% endif %}
+
+                  {% if tc.medical_rationale %}
+                    <div class="note"><strong>Medical rationale:</strong> {{ tc.medical_rationale }}</div>
+                  {% endif %}
+                  {% if tc.technical_logic %}
+                    <div class="note"><strong>Technical logic:</strong> {{ tc.technical_logic }}</div>
+                  {% endif %}
+                </div>
+              </details>
+            {% endfor %}
+          </div>
+        </section>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <script>
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    async function run(mode, id) {
+      const resp = await fetch("{% url 'criteria:test_cases_run' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCookie("csrftoken"),
+        },
+        body: JSON.stringify(id ? { mode, id } : { mode }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || "Run failed");
+      return data;
+    }
+
+    function setStatus(tcId, status) {
+      const el = document.getElementById(`status-${tcId}`);
+      if (!el) return;
+      el.textContent = status;
+      el.classList.remove("danger", "success", "neutral");
+      if (status === "PASS") el.classList.add("success");
+      else if (status === "FAIL" || status === "ERROR") el.classList.add("danger");
+      else el.classList.add("neutral");
+    }
+
+    function setDiffs(tcId, diffs) {
+      const el = document.getElementById(`diffs-${tcId}`);
+      if (!el) return;
+      if (!diffs || diffs.length === 0) {
+        el.style.display = "none";
+        el.textContent = "";
+        return;
+      }
+      el.style.display = "block";
+      el.innerHTML = `<strong>Diffs / warnings</strong><ul>${diffs.map(d => `<li class="mono">${d}</li>`).join("")}</ul>`;
+    }
+
+    function setIO(tcId, r) {
+      const el = document.getElementById(`io-${tcId}`);
+      if (!el) return;
+      if (!r) {
+        el.style.display = "none";
+        el.textContent = "";
+        return;
+      }
+      el.style.display = "block";
+      const expected = r.expected || {};
+      const actual = r.actual || {};
+      const ni = r.normalized_input || {};
+      const selections = (ni.selections && typeof ni.selections === "object") ? Object.keys(ni.selections).filter(k => ni.selections[k]) : [];
+
+      const rows = (obj) => {
+        const keys = ["total_score","meets_classification","risk_tier","domain_id","domain_score"];
+        const kv = keys
+          .filter(k => obj && Object.prototype.hasOwnProperty.call(obj, k))
+          .map(k => `<tr><td class="mono">${k}</td><td>${obj[k] === null ? "<span class='muted'>null</span>" : String(obj[k])}</td></tr>`)
+          .join("");
+        return kv || "<tr><td colspan='2' class='muted'>Không có dữ liệu</td></tr>";
+      };
+
+      const pretty = (obj) => {
+        try { return JSON.stringify(obj, null, 2); } catch { return String(obj); }
+      };
+
+      el.innerHTML = `
+        <div class="cols">
+          <div class="domain">
+            <div class="domain-title"><strong>Input (đã chuẩn hoá)</strong><span class="pill">${ni.ana_positive ? "ANA +" : "ANA -"}</span></div>
+            <table class="kv">
+              <tr><td>selections</td><td>${selections.length ? selections.map(s => `<span class="pill mono" style="margin:2px 6px 2px 0; display:inline-block;">${s}</span>`).join("") : "<span class='muted'>none</span>"}</td></tr>
+            </table>
+            <details style="margin-top:10px;">
+              <summary style="cursor:pointer;">Xem raw JSON</summary>
+              <pre class="mono">${pretty(ni)}</pre>
+            </details>
+          </div>
+
+          <div class="domain">
+            <div class="domain-title"><strong>Expected</strong><span class="pill neutral">from JSON</span></div>
+            <table class="kv">${rows(expected)}</table>
+            <details style="margin-top:10px;">
+              <summary style="cursor:pointer;">Xem raw JSON</summary>
+              <pre class="mono">${pretty(expected)}</pre>
+            </details>
+          </div>
+
+          <div class="domain">
+            <div class="domain-title"><strong>Actual</strong><span class="pill neutral">engine output</span></div>
+            <table class="kv">${rows(actual)}</table>
+            <details style="margin-top:10px;">
+              <summary style="cursor:pointer;">Xem raw JSON</summary>
+              <pre class="mono">${pretty(actual)}</pre>
+            </details>
+          </div>
+        </div>
+      `;
+    }
+
+    function setSummary(summary) {
+      const el = document.getElementById("summary");
+      if (!el) return;
+      el.textContent = `PASS ${summary.PASS} · FAIL ${summary.FAIL} · SKIP ${summary.SKIP} · ERROR ${summary.ERROR} · TOTAL ${summary.TOTAL}`;
+    }
+
+    document.getElementById("runAllBtn")?.addEventListener("click", async () => {
+      try {
+        const out = await run("all");
+        setSummary(out.summary);
+        out.results.forEach(r => {
+          setStatus(r.id, r.status);
+          setIO(r.id, r);
+          setDiffs(r.id, r.diffs);
+        });
+      } catch (e) {
+        alert(e.message);
+      }
+    });
+
+    document.querySelectorAll(".runOneBtn").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const tcId = btn.getAttribute("data-id");
+        try {
+          const out = await run("one", tcId);
+          setSummary(out.summary);
+          const r = out.results[0];
+          setStatus(r.id, r.status);
+          setIO(r.id, r);
+          setDiffs(r.id, r.diffs);
+        } catch (e) {
+          alert(e.message);
+        }
+      });
+    });
+  </script>
+{% endblock %}
+
+

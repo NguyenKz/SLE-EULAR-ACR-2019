@@ -1,0 +1,167 @@
+{
+    "test_suite": "Extended EULAR/ACR 2019 SLE System Validation",
+    "version": "2.0",
+    "test_cases": [
+        {
+            "category": "1. Kiểm tra logic Miền Thận (Renal Domain - Critical Path)",
+            "cases": [
+                {
+                    "id": "TC-09",
+                    "description": "Sinh thiết thận là tiêu chuẩn vàng",
+                    "input": {
+                        "ana_status": true,
+                        "selected_criteria": [
+                            "Lupus Nephritis Class III or IV (10 points)"
+                        ]
+                    },
+                    "expected_output": {
+                        "total_score": 10,
+                        "classification": "SLE Classified",
+                        "risk_level": "Moderate / Standard"
+                    },
+                    "medical_rationale": "Theo tiêu chuẩn, chỉ riêng sinh thiết thận loại III/IV đã đủ 10 điểm để chẩn đoán nếu ANA dương tính[cite: 47]."
+                },
+                {
+                    "id": "TC-10",
+                    "description": "Ưu tiên điểm sinh thiết hơn Protein niệu",
+                    "input": {
+                        "ana_status": true,
+                        "selected_criteria": [
+                            "Proteinuria > 0.5g/24h (4 points)",
+                            "Lupus Nephritis Class II or V (8 points)"
+                        ]
+                    },
+                    "expected_output": {
+                        "domain_score": 8,
+                        "total_score": 8
+                    },
+                    "medical_rationale": "Áp dụng quy tắc Max-in-Domain, điểm sinh thiết cao hơn Protein niệu nên được chọn[cite: 43, 47]."
+                }
+            ]
+        },
+        {
+            "category": "2. Kiểm tra Miền Miễn dịch & Bổ thể (Immunologic Domains)",
+            "cases": [
+                {
+                    "id": "TC-11",
+                    "description": "Logic cộng dồn miền Bổ thể",
+                    "input": {
+                        "ana_status": true,
+                        "selected_criteria": [
+                            "Low C3 (3 points)",
+                            "Low C4 (3 points)"
+                        ]
+                    },
+                    "expected_output": {
+                        "domain_score": 4
+                    },
+                    "medical_rationale": "Nếu giảm cả C3 VÀ C4, điểm miền bổ thể là 4 thay vì 3 (Max-in-Domain đặc biệt)[cite: 48]."
+                },
+                {
+                    "id": "TC-12",
+                    "description": "Kháng thể Antiphospholipid (Không cộng dồn)",
+                    "input": {
+                        "ana_status": true,
+                        "selected_criteria": [
+                            "Anti-cardiolipin (2 points)",
+                            "Lupus anticoagulant (2 points)"
+                        ]
+                    },
+                    "expected_output": {
+                        "domain_score": 2
+                    },
+                    "medical_rationale": "Bất kỳ kháng thể Antiphospholipid nào dương tính cũng chỉ tính 2 điểm cho cả miền[cite: 48]."
+                }
+            ]
+        },
+        {
+            "category": "3. Kiểm tra Ngưỡng Biên Phân tầng Nguy cơ (Ominosity Thresholds)",
+            "cases": [
+                {
+                    "id": "TC-13",
+                    "description": "Ngưỡng cận biên không bị SLE (9 điểm)",
+                    "input": {
+                        "ana_status": true,
+                        "selected_criteria": [
+                            "Acute pericarditis (6 points)",
+                            "Leukopenia (3 points)"
+                        ]
+                    },
+                    "expected_output": {
+                        "total_score": 9,
+                        "classification": "Not Classified",
+                        "risk_level": "Low"
+                    },
+                    "medical_rationale": "Tổng điểm dưới 10 chưa đủ tiêu chuẩn phân loại SLE[cite: 49, 64]."
+                },
+                {
+                    "id": "TC-14",
+                    "description": "Ngưỡng cận biên Ominous (19 điểm)",
+                    "input": {
+                        "ana_status": true,
+                        "selected_criteria": [
+                            "Lupus Nephritis Class II/V (8 points)",
+                            "Arthritis (6 points)",
+                            "Seizure (5 points)"
+                        ]
+                    },
+                    "expected_output": {
+                        "total_score": 19,
+                        "classification": "SLE Classified",
+                        "risk_level": "Moderate / Standard"
+                    },
+                    "medical_rationale": "Tổng điểm 19 vẫn thuộc nhóm nguy cơ tiêu chuẩn, chưa chạm ngưỡng cảnh báo đỏ[cite: 65]."
+                }
+            ]
+        },
+        {
+            "category": "4. Kiểm tra Logic Thần kinh & Tâm thần (Neuropsychiatric)",
+            "cases": [
+                {
+                    "id": "TC-15",
+                    "description": "Quy tắc Max-in-Domain cho biểu hiện thần kinh nặng",
+                    "input": {
+                        "ana_status": true,
+                        "selected_criteria": [
+                            "Delirium (2 points)",
+                            "Psychosis (3 points)",
+                            "Seizure (5 points)"
+                        ]
+                    },
+                    "expected_output": {
+                        "domain_score": 5,
+                        "total_score": 5
+                    },
+                    "medical_rationale": "Chỉ tính 5 điểm cho biểu hiện nặng nhất (Co giật) trong miền thần kinh tâm thần[cite: 43, 47]."
+                }
+            ]
+        },
+        {
+            "category": "5. Kiểm tra Kỹ thuật & Hệ thống (Technical & Integration)",
+            "cases": [
+                {
+                    "id": "TC-16",
+                    "description": "Xử lý dữ liệu rỗng (Null/Empty Submission)",
+                    "input": {
+                        "ana_status": true,
+                        "selected_criteria": []
+                    },
+                    "expected_output": {
+                        "total_score": 0,
+                        "error_message": null
+                    },
+                    "technical_logic": "Hệ thống phải trả về 0 điểm thay vì lỗi logic khi không có triệu chứng nào được chọn[cite: 109, 132]."
+                },
+                {
+                    "id": "TC-17",
+                    "description": "Tính toàn vẹn của Docker Container",
+                    "action": "docker-compose up",
+                    "expected_output": {
+                        "status": "All services (Django, Postgres, Redis) running"
+                    },
+                    "technical_logic": "Đảm bảo tính tái lập của môi trường nghiên cứu thông qua ảo hóa[cite: 144, 146]."
+                }
+            ]
+        }
+    ]
+}

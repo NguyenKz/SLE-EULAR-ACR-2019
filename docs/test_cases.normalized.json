@@ -1,0 +1,183 @@
+{
+  "schema_version": "internal_ids_v2",
+  "test_suite": "Extended EULAR/ACR 2019 SLE System Validation",
+  "version": "2.0",
+  "test_cases": [
+    {
+      "category": "1. Kiểm tra logic Miền Thận (Renal Domain - Critical Path)",
+      "cases": [
+        {
+          "id": "TC-09",
+          "description": "Sinh thiết thận là tiêu chuẩn vàng",
+          "kind": "auto",
+          "medical_rationale": "Theo tiêu chuẩn, chỉ riêng sinh thiết thận loại III/IV đã đủ 10 điểm để chẩn đoán nếu ANA dương tính[cite: 47].",
+          "input": {
+            "ana_positive": true,
+            "selections": [
+              "renal_biopsy_class_iii_or_iv"
+            ]
+          },
+          "expected": {
+            "total_score": 10,
+            "meets_classification": true,
+            "risk_tier": "SLE Tiêu chuẩn"
+          }
+        },
+        {
+          "id": "TC-10",
+          "description": "Ưu tiên điểm sinh thiết hơn Protein niệu",
+          "kind": "auto",
+          "medical_rationale": "Áp dụng quy tắc Max-in-Domain, điểm sinh thiết cao hơn Protein niệu nên được chọn[cite: 43, 47].",
+          "input": {
+            "ana_positive": true,
+            "selections": [
+              "proteinuria",
+              "renal_biopsy_class_ii_or_v"
+            ]
+          },
+          "expected": {
+            "total_score": 8,
+            "domain_id": "renal",
+            "domain_score": 8
+          }
+        }
+      ]
+    },
+    {
+      "category": "2. Kiểm tra Miền Miễn dịch & Bổ thể (Immunologic Domains)",
+      "cases": [
+        {
+          "id": "TC-11",
+          "description": "Logic cộng dồn miền Bổ thể",
+          "kind": "auto",
+          "medical_rationale": "Nếu giảm cả C3 VÀ C4, điểm miền bổ thể là 4 thay vì 3 (Max-in-Domain đặc biệt)[cite: 48].",
+          "input": {
+            "ana_positive": true,
+            "selections": [
+              "low_c3_and_c4"
+            ]
+          },
+          "expected": {
+            "domain_id": "complement",
+            "domain_score": 4,
+            "total_score": 4
+          }
+        },
+        {
+          "id": "TC-12",
+          "description": "Kháng thể Antiphospholipid (Không cộng dồn)",
+          "kind": "auto",
+          "medical_rationale": "Bất kỳ kháng thể Antiphospholipid nào dương tính cũng chỉ tính 2 điểm cho cả miền[cite: 48].",
+          "input": {
+            "ana_positive": true,
+            "selections": [
+              "antiphospholipid_any"
+            ]
+          },
+          "expected": {
+            "domain_id": "antiphospholipid",
+            "domain_score": 2,
+            "total_score": 2
+          }
+        }
+      ]
+    },
+    {
+      "category": "3. Kiểm tra Ngưỡng Biên Phân tầng Nguy cơ (Ominosity Thresholds)",
+      "cases": [
+        {
+          "id": "TC-13",
+          "description": "Ngưỡng cận biên không bị SLE (9 điểm)",
+          "kind": "auto",
+          "medical_rationale": "Tổng điểm dưới 10 chưa đủ tiêu chuẩn phân loại SLE[cite: 49, 64].",
+          "input": {
+            "ana_positive": true,
+            "selections": [
+              "acute_pericarditis",
+              "leukopenia"
+            ]
+          },
+          "expected": {
+            "total_score": 9,
+            "meets_classification": false,
+            "risk_tier": "Chưa đủ tiêu chuẩn"
+          }
+        },
+        {
+          "id": "TC-14",
+          "description": "Ngưỡng cận biên Ominous (19 điểm)",
+          "kind": "auto",
+          "medical_rationale": "Tổng điểm 19 vẫn thuộc nhóm nguy cơ tiêu chuẩn, chưa chạm ngưỡng cảnh báo đỏ[cite: 65].",
+          "input": {
+            "ana_positive": true,
+            "selections": [
+              "joint_involvement",
+              "renal_biopsy_class_ii_or_v",
+              "seizure"
+            ]
+          },
+          "expected": {
+            "total_score": 19,
+            "meets_classification": true,
+            "risk_tier": "SLE Tiêu chuẩn"
+          }
+        }
+      ]
+    },
+    {
+      "category": "4. Kiểm tra Logic Thần kinh & Tâm thần (Neuropsychiatric)",
+      "cases": [
+        {
+          "id": "TC-15",
+          "description": "Quy tắc Max-in-Domain cho biểu hiện thần kinh nặng",
+          "kind": "auto",
+          "medical_rationale": "Chỉ tính 5 điểm cho biểu hiện nặng nhất (Co giật) trong miền thần kinh tâm thần[cite: 43, 47].",
+          "input": {
+            "ana_positive": true,
+            "selections": [
+              "delirium",
+              "psychosis",
+              "seizure"
+            ]
+          },
+          "expected": {
+            "domain_id": "neuropsychiatric",
+            "domain_score": 5,
+            "total_score": 5
+          }
+        }
+      ]
+    },
+    {
+      "category": "5. Kiểm tra Kỹ thuật & Hệ thống (Technical & Integration)",
+      "cases": [
+        {
+          "id": "TC-16",
+          "description": "Xử lý dữ liệu rỗng (Null/Empty Submission)",
+          "kind": "auto",
+          "technical_logic": "Hệ thống phải trả về 0 điểm thay vì lỗi logic khi không có triệu chứng nào được chọn[cite: 109, 132].",
+          "input": {
+            "ana_positive": true,
+            "selections": []
+          },
+          "expected": {
+            "total_score": 0,
+            "meets_classification": false,
+            "risk_tier": "Chưa đủ tiêu chuẩn"
+          }
+        },
+        {
+          "id": "TC-17",
+          "description": "Tính toàn vẹn của Docker Container",
+          "kind": "manual",
+          "action": "docker-compose up",
+          "expected": {
+            "status": "All services (Django, Postgres, Redis) running"
+          },
+          "technical_logic": "Đảm bảo tính tái lập của môi trường nghiên cứu thông qua ảo hóa[cite: 144, 146]."
+        }
+      ]
+    }
+  ]
+}
+

@@ -1,0 +1,59 @@
+{% extends "criteria/base.html" %}
+
+{% block title %}Tính điểm EULAR/ACR 2019{% endblock %}
+
+{% block content %}
+  <h1>Tính điểm &amp; phân tầng nguy cơ SLE (EULAR/ACR 2019)</h1>
+  <p class="muted">
+    Theo báo cáo đồ án: tiêu chuẩn đầu vào ANA (+), nguyên tắc <span class="mono">Max-in-Domain</span>, ngưỡng phân loại tổng điểm ≥ 10,
+    và phân tầng nguy cơ theo ngưỡng 20.
+  </p>
+
+  <form method="post" class="card">
+    {% csrf_token %}
+
+    <div class="domain">
+      <div class="domain-title">
+        <strong>{{ form.ana_positive.label }}</strong>
+      </div>
+      {{ form.ana_positive }}
+      <div class="note">
+        Nếu ANA âm tính, hệ thống sẽ dừng và trả về “không phân loại SLE theo EULAR/ACR 2019”.
+      </div>
+    </div>
+
+    <h2>Tiêu chí theo miền</h2>
+    <div class="grid">
+      {% for block in domain_blocks %}
+        {% with d=block.domain %}
+        <section class="domain">
+          <div class="domain-title">
+            <strong>{{ d.label }}</strong>
+            <span class="pill">{% if d.max_in_domain %}Chọn MAX trong miền{% else %}Đơn trị{% endif %}</span>
+          </div>
+          {% if d.note %}
+            <div class="note">{{ d.note }}</div>
+          {% endif %}
+          <div>
+            {% for row in block.fields %}
+              <label>
+                {{ row.bf }}
+                <span>{{ row.bf.label }}</span>
+              </label>
+            {% endfor %}
+          </div>
+        </section>
+        {% endwith %}
+      {% endfor %}
+    </div>
+
+    <div class="actions">
+      <button type="submit">Tính điểm</button>
+      {% if form.errors %}
+        <span class="err">Vui lòng kiểm tra lại dữ liệu nhập.</span>
+      {% endif %}
+    </div>
+  </form>
+{% endblock %}
+
+

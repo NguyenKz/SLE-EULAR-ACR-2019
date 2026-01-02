@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}SLE EULAR/ACR 2019{% endblock %}</title>
+    <style>
+      :root { color-scheme: light; --fg:#111; --muted:#666; --bg:#fff; --card:#f6f7f9; --border:#e5e7eb; --accent:#2563eb; --danger:#b91c1c; }
+      body { margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji"; color:var(--fg); background:var(--bg); }
+      header { border-bottom:1px solid var(--border); background:var(--bg); position:sticky; top:0; }
+      .wrap { max-width: 980px; margin: 0 auto; padding: 18px 16px; }
+      nav { display:flex; gap:14px; align-items:center; justify-content:space-between; }
+      nav a { color:var(--accent); text-decoration:none; font-weight:600; }
+      nav .right { display:flex; gap:14px; }
+      h1 { font-size: 22px; margin: 0 0 10px; }
+      h2 { font-size: 18px; margin: 22px 0 10px; }
+      .muted { color: var(--muted); }
+      .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
+      .grid { display:grid; grid-template-columns: 1fr; gap: 12px; }
+      .domain { padding: 12px; border:1px solid var(--border); border-radius: 12px; background: var(--bg); }
+      .domain-title { display:flex; justify-content:space-between; gap:12px; align-items:baseline; }
+      .domain-title strong { font-size: 14px; }
+      .note { font-size: 13px; color: var(--muted); margin-top: 6px; }
+      label { display:flex; gap:10px; align-items:flex-start; padding: 6px 0; }
+      input[type="checkbox"] { margin-top: 2px; }
+      .actions { display:flex; gap:10px; align-items:center; margin-top: 14px; flex-wrap: wrap; }
+      button { background: var(--accent); color:#fff; border:0; padding: 10px 14px; border-radius: 10px; cursor:pointer; font-weight:700; }
+      .pill { display:inline-block; padding: 4px 10px; border-radius: 999px; border:1px solid var(--border); background: #fff; font-size: 13px; }
+      .pill.danger { border-color: #fecaca; background:#fff1f2; color: var(--danger); }
+      .pill.success { border-color: #bbf7d0; background:#f0fdf4; color:#166534; }
+      .pill.neutral { border-color: var(--border); background:#f8fafc; color:#334155; }
+      .btn-secondary { background:#0f172a; }
+      .btn-ghost { background:transparent; color:var(--accent); border:1px solid var(--border); }
+      footer { border-top:1px solid var(--border); margin-top: 24px; }
+      .small { font-size: 13px; }
+      .err { color: var(--danger); }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+      pre.mono { background:#0b1020; color:#e5e7eb; border-radius: 10px; padding: 10px; overflow:auto; }
+      .kv { width:100%; border-collapse: collapse; }
+      .kv td { padding: 6px 8px; border-top: 1px solid var(--border); vertical-align: top; }
+      .kv td:first-child { color: var(--muted); width: 180px; }
+      .cols { display:grid; grid-template-columns: 1fr; gap: 10px; }
+      @media (min-width: 860px) { .cols { grid-template-columns: 1fr 1fr 1fr; } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="wrap">
+        <nav>
+          <a href="{% url 'criteria:index' %}">SLE EULAR/ACR 2019</a>
+          <div class="right">
+            <a href="{% url 'criteria:theory' %}">Cơ sở lý thuyết</a>
+            <a href="{% url 'criteria:test_cases' %}">Test case</a>
+            <a href="{% url 'criteria:about' %}">Giới thiệu</a>
+          </div>
+        </nav>
+      </div>
+    </header>
+    <main class="wrap">
+      {% block content %}{% endblock %}
+    </main>
+    <footer>
+      <div class="wrap small muted">
+        Công cụ hỗ trợ học tập/tra cứu. Không thay thế chẩn đoán của bác sĩ.
+      </div>
+    </footer>
+  </body>
+</html>
+
+

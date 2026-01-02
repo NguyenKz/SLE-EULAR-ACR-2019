@@ -1,0 +1,21 @@
+{% extends "criteria/base.html" %}
+
+{% block title %}Giới thiệu{% endblock %}
+
+{% block content %}
+  <h1>Giới thiệu</h1>
+  <div class="card">
+    <p>
+      Ứng dụng này tự động hóa tính điểm theo tiêu chuẩn phân loại SLE EULAR/ACR 2019 và phân tầng nguy cơ theo ngưỡng điểm.
+    </p>
+    <p class="muted small">
+      Nguồn logic/điểm số được triển khai theo báo cáo đồ án của bạn (Bảng 1 và mục 2.3 “Ominosity”).
+      Đây là công cụ hỗ trợ tra cứu/học tập, không thay thế chẩn đoán lâm sàng.
+    </p>
+    <p class="small">
+      API: <span class="mono">POST /api/score</span> với JSON gồm <span class="mono">ana_positive</span> và <span class="mono">selections</span>.
+    </p>
+  </div>
+{% endblock %}
+
+

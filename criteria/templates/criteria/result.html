@@ -1,0 +1,69 @@
+{% extends "criteria/base.html" %}
+
+{% block title %}Kết quả{% endblock %}
+
+{% block content %}
+  <h1>Kết quả tính điểm</h1>
+
+  <div class="card">
+    {% if not result.eligible %}
+      <div class="pill danger">Không đủ điều kiện</div>
+      <p><strong>Lý do:</strong> {{ result.ineligible_reason }}</p>
+      <p class="muted">{{ result.risk_note }}</p>
+    {% else %}
+      <p>
+        <strong>Tổng điểm:</strong> <span class="mono">{{ result.total_score }}</span>
+        {% if result.meets_classification %}
+          <span class="pill">Đủ tiêu chuẩn phân loại (≥ 10)</span>
+        {% else %}
+          <span class="pill danger">Chưa đủ tiêu chuẩn (&lt; 10)</span>
+        {% endif %}
+      </p>
+
+      {% if result.risk_tier == "SLE Nguy cơ cao / Ominous" %}
+        <p><strong>Phân tầng:</strong> <span class="pill danger">{{ result.risk_tier }}</span></p>
+      {% else %}
+        <p><strong>Phân tầng:</strong> <span class="pill">{{ result.risk_tier }}</span></p>
+      {% endif %}
+      <p class="muted">{{ result.risk_note }}</p>
+    {% endif %}
+  </div>
+
+  {% if result.domain_scores %}
+    <h2>Chi tiết theo miền (Max-in-Domain)</h2>
+    <div class="grid">
+      {% for ds in result.domain_scores %}
+        <section class="domain">
+          <div class="domain-title">
+            <strong>{{ ds.domain_label }}</strong>
+            <span class="pill">+{{ ds.awarded_points }}</span>
+          </div>
+          {% if ds.note %}
+            <div class="note">{{ ds.note }}</div>
+          {% endif %}
+          {% if ds.selected_criteria %}
+            <div class="small">
+              <div><strong>Đã chọn:</strong></div>
+              <ul>
+                {% for c in ds.selected_criteria %}
+                  <li>{{ c.label }} ({{ c.points }} điểm)</li>
+                {% endfor %}
+              </ul>
+              {% if ds.awarded_criterion %}
+                <div class="muted">Tính điểm: {{ ds.awarded_criterion.label }} (MAX)</div>
+              {% endif %}
+            </div>
+          {% else %}
+            <div class="muted small">Không chọn tiêu chí nào trong miền này.</div>
+          {% endif %}
+        </section>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="actions">
+    <a href="{% url 'criteria:index' %}">← Tính lại</a>
+  </div>
+{% endblock %}
+
+
