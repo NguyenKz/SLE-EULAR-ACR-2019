@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      @page { size: A4; margin: 18mm 16mm; }
+      body { font-family: sans-serif; font-size: 12px; color: #111; }
+      h1 { font-size: 18px; margin: 0 0 8px; }
+      h2 { font-size: 14px; margin: 16px 0 8px; }
+      .muted { color: #555; }
+      .box { border: 1px solid #ddd; border-radius: 10px; padding: 10px 12px; }
+      .row { display: flex; gap: 14px; }
+      .col { flex: 1; }
+      .kv { width: 100%; border-collapse: collapse; }
+      .kv td { padding: 6px 6px; border-top: 1px solid #eee; vertical-align: top; }
+      .kv td:first-child { width: 140px; color: #555; }
+      table.grid { width: 100%; border-collapse: collapse; margin-top: 8px; }
+      table.grid th, table.grid td { border: 1px solid #eee; padding: 6px; text-align: left; vertical-align: top; }
+      table.grid th { background: #f6f7f9; }
+      .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; border: 1px solid #ddd; background: #f8fafc; }
+      .pill.danger { border-color: #fecaca; background: #fff1f2; color: #b91c1c; }
+      .pill.ok { border-color: #bbf7d0; background: #f0fdf4; color: #166534; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+      .footer { margin-top: 14px; font-size: 10px; color: #666; }
+    </style>
+    <title>Phiếu kết quả EULAR/ACR 2019</title>
+  </head>
+  <body>
+    <h1>Phiếu kết quả tính điểm SLE (EULAR/ACR 2019)</h1>
+    <div class="muted">Generated at: <span class="mono">{{ report.generated_at }}</span></div>
+
+    <h2>Thông tin</h2>
+    <div class="box">
+      <table class="kv">
+        <tr><td>Họ tên</td><td>{{ report.patient_info.full_name|default:"(trống)" }}</td></tr>
+        <tr><td>Mã</td><td class="mono">{{ report.patient_info.patient_code|default:"(trống)" }}</td></tr>
+      </table>
+    </div>
+
+    <h2>Kết quả</h2>
+    <div class="box">
+      {% if not report.result.eligible %}
+        <div class="pill danger">Không đủ điều kiện</div>
+        <p><strong>Lý do:</strong> {{ report.result.ineligible_reason }}</p>
+        <p class="muted">{{ report.result.risk_note }}</p>
+      {% else %}
+        <div class="row">
+          <div class="col">
+            <table class="kv">
+              <tr><td>Tổng điểm</td><td><strong class="mono">{{ report.result.total_score }}</strong></td></tr>
+              <tr>
+                <td>Phân loại</td>
+                <td>
+                  {% if report.result.meets_classification %}
+                    <span class="pill ok">Đủ tiêu chuẩn (≥ 10)</span>
+                  {% else %}
+                    <span class="pill danger">Chưa đủ (&lt; 10)</span>
+                  {% endif %}
+                </td>
+              </tr>
+              <tr>
+                <td>Phân tầng</td>
+                <td>
+                  {% if report.result.risk_tier == "SLE Nguy cơ cao / Ominous" %}
+                    <span class="pill danger">{{ report.result.risk_tier }}</span>
+                  {% else %}
+                    <span class="pill">{{ report.result.risk_tier }}</span>
+                  {% endif %}
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div class="col">
+            <div class="muted"><strong>Ghi chú</strong></div>
+            <div class="muted">{{ report.result.risk_note }}</div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    {% if report.result.domain_scores %}
+      <h2>Chi tiết theo miền (Max-in-Domain)</h2>
+      <table class="grid">
+        <thead>
+          <tr>
+            <th>Miền</th>
+            <th>Điểm</th>
+            <th>Tiêu chí được tính</th>
+            <th>Tiêu chí đã chọn</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ds in report.result.domain_scores %}
+            <tr>
+              <td>{{ ds.domain_label }}</td>
+              <td class="mono">{{ ds.awarded_points }}</td>
+              <td>
+                {% if ds.awarded_criterion %}
+                  {{ ds.awarded_criterion.label }} ({{ ds.awarded_criterion.points }})
+                {% else %}
+                  <span class="muted">(không)</span>
+                {% endif %}
+                {% if ds.note %}
+                  <div class="muted">{{ ds.note }}</div>
+                {% endif %}
+              </td>
+              <td>
+                {% if ds.selected_criteria %}
+                  <ul style="margin:0; padding-left: 16px;">
+                    {% for c in ds.selected_criteria %}
+                      <li>{{ c.label }} ({{ c.points }})</li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <span class="muted">(không)</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+
+    <div class="footer">
+      Công cụ hỗ trợ học tập/tra cứu. Không thay thế chẩn đoán của bác sĩ.
+    </div>
+  </body>
+</html>
+
+

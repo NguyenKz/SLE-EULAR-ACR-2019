@@ -1,7 +1,9 @@
 import json
 from pathlib import Path
+from datetime import datetime
 
 from django.http import HttpRequest, JsonResponse
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods
@@ -53,6 +55,40 @@ def _radar_payload(result):
     return axes
 
 
+def _result_to_dict(result):
+    return {
+        "ana_positive": result.ana_positive,
+        "eligible": result.eligible,
+        "ineligible_reason": result.ineligible_reason,
+        "total_score": result.total_score,
+        "meets_classification": result.meets_classification,
+        "risk_tier": result.risk_tier,
+        "risk_note": result.risk_note,
+        "domain_scores": [
+            {
+                "domain_id": ds.domain_id,
+                "domain_label": ds.domain_label,
+                "awarded_points": ds.awarded_points,
+                "awarded_criterion": (
+                    {
+                        "id": ds.awarded_criterion.id,
+                        "label": ds.awarded_criterion.label,
+                        "points": ds.awarded_criterion.points,
+                    }
+                    if ds.awarded_criterion
+                    else None
+                ),
+                "selected_criteria": [
+                    {"id": c.id, "label": c.label, "points": c.points}
+                    for c in ds.selected_criteria
+                ],
+                "note": ds.note,
+            }
+            for ds in result.domain_scores
+        ],
+    }
+
+
 @require_http_methods(["GET", "POST"])
 def index(request: HttpRequest):
     if request.method == "POST":
@@ -62,6 +98,13 @@ def index(request: HttpRequest):
                 ana_positive=form.cleaned_ana_positive(),
                 selections=form.cleaned_selections(),
             )
+            patient_info = form.cleaned_patient_info()
+            request.session["last_report"] = {
+                "generated_at": datetime.now().isoformat(timespec="seconds"),
+                "patient_info": patient_info,
+                "result": _result_to_dict(result),
+                "radar_axes": _radar_payload(result),
+            }
             return render(
                 request,
                 "criteria/result.html",
@@ -70,6 +113,7 @@ def index(request: HttpRequest):
                     "result": result,
                     "domain_blocks": _domain_blocks(form),
                     "radar_axes": _radar_payload(result),
+                    "patient_info": patient_info,
                 },
             )
     else:
@@ -187,6 +231,39 @@ def test_cases_run(request: HttpRequest):
         "TOTAL": len(results),
     }
     return JsonResponse({"summary": summary, "results": results}, json_dumps_params={"ensure_ascii": False})
+
+
+@require_http_methods(["GET"])
+def export_pdf(request: HttpRequest):
+    """
+    Export the last computed result as a PDF (from session).
+    """
+    report = request.session.get("last_report")
+    if not report:
+        return JsonResponse({"error": "Chưa có kết quả để xuất PDF. Hãy tính điểm trước."}, status=400)
+
+    try:
+        from weasyprint import HTML  # type: ignore
+    except Exception as e:
+        return JsonResponse({"error": f"Thiếu weasyprint để xuất PDF: {type(e).__name__}"}, status=500)
+
+    html = render(
+        request,
+        "criteria/pdf_result.html",
+        {
+            "report": report,
+        },
+    ).content.decode("utf-8")
+
+    pdf_bytes = HTML(string=html, base_url=str(Path(__file__).resolve().parent)).write_pdf()
+
+    code = (report.get("patient_info", {}) or {}).get("patient_code") or "sle"
+    safe = "".join(ch for ch in str(code) if ch.isalnum() or ch in ("-", "_")).strip() or "sle"
+    filename = f"{safe}-eular-acr-2019.pdf"
+
+    resp = HttpResponse(pdf_bytes, content_type="application/pdf")
+    resp["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return resp
 
 
 @require_http_methods(["POST"])

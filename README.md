@@ -6,8 +6,21 @@
 - Áp dụng **ANA** làm tiêu chuẩn đầu vào
 - Tính điểm theo nguyên tắc **Max-in-Domain** (chỉ lấy điểm cao nhất trong mỗi miền)
 - Phân tầng nguy cơ theo mô hình trong báo cáo: **Score < 10**, **10 ≤ Score < 20**, **Score ≥ 20**
+- Nhập **họ tên / mã** và **Xuất PDF** phiếu kết quả
 
 Logic/điểm số được triển khai theo báo cáo đồ án: [`docs/main_doc.pdf`](file:///Users/tracydt/Documents/code/doan_ppnckh/docs/main_doc.pdf).
+
+## Cơ sở lý thuyết (EULAR/ACR 2019)
+
+Trong ứng dụng, logic được triển khai theo các ý chính (xem trang `http://localhost:8000/theory/` để đọc đầy đủ):
+
+- **Tiêu chuẩn đầu vào (ANA gate)**: chỉ chấm điểm khi **ANA dương tính**; nếu ANA âm tính → **không phân loại** theo EULAR/ACR 2019.
+- **Nguyên tắc Max-in-Domain**: trong mỗi **miền (domain)**, nếu chọn nhiều tiêu chí thì **chỉ lấy tiêu chí có điểm cao nhất**.
+- **Ngưỡng phân loại**: tổng điểm **≥ 10** (và ANA +) → **đủ tiêu chuẩn phân loại SLE**.
+- **Phân tầng nguy cơ (theo báo cáo)**:
+  - **Score < 10**: Không phân loại SLE
+  - **10 ≤ Score < 20**: SLE
+  - **Score ≥ 20**: SLE nguy cơ cao / Ominous
 
 ## Chạy bằng Docker
 
@@ -27,8 +40,11 @@ Khi chạy bằng `docker compose`, hệ thống sẽ dùng **PostgreSQL** (serv
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+python manage.py migrate
 python manage.py runserver
 ```
+
+Ghi chú: tính năng **Xuất PDF** dùng session của Django, nên cần chạy `migrate` để tạo bảng `django_session`.
 
 ### Postgres (local – optional)
 

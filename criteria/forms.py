@@ -6,6 +6,17 @@ from .scoring import get_domains
 
 
 class CriteriaForm(forms.Form):
+    full_name = forms.CharField(
+        label="Họ và tên",
+        required=False,
+        widget=forms.TextInput(attrs={"placeholder": "Ví dụ: Nguyễn Văn A"}),
+    )
+    patient_code = forms.CharField(
+        label="Mã",
+        required=False,
+        widget=forms.TextInput(attrs={"placeholder": "Ví dụ: BN-0001"}),
+    )
+
     ANA_CHOICES = (
         ("true", "Dương tính (ANA +)"),
         ("false", "Âm tính (ANA -)"),
@@ -38,5 +49,11 @@ class CriteriaForm(forms.Form):
 
     def cleaned_ana_positive(self) -> bool:
         return self.cleaned_data.get("ana_positive") == "true"
+
+    def cleaned_patient_info(self) -> dict[str, str]:
+        return {
+            "full_name": (self.cleaned_data.get("full_name") or "").strip(),
+            "patient_code": (self.cleaned_data.get("patient_code") or "").strip(),
+        }
 
 

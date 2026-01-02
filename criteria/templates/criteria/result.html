@@ -6,6 +6,13 @@
   <h1>Kết quả tính điểm</h1>
 
   <div class="card">
+    {% if patient_info.full_name or patient_info.patient_code %}
+      <p class="small">
+        <strong>Họ tên:</strong> {{ patient_info.full_name|default:"(trống)" }}<br/>
+        <strong>Mã:</strong> <span class="mono">{{ patient_info.patient_code|default:"(trống)" }}</span>
+      </p>
+      <div style="height:1px; background: var(--border); margin: 10px 0;"></div>
+    {% endif %}
     {% if not result.eligible %}
       <div class="pill danger">Không đủ điều kiện</div>
       <p><strong>Lý do:</strong> {{ result.ineligible_reason }}</p>
@@ -189,6 +196,7 @@
 
   <div class="actions">
     <a href="{% url 'criteria:index' %}">← Tính lại</a>
+    <a class="pill" href="{% url 'criteria:export_pdf' %}">Xuất PDF</a>
   </div>
 {% endblock %}
 

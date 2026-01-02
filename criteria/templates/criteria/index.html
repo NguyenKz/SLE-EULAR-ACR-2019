@@ -14,6 +14,25 @@
 
     <div class="domain">
       <div class="domain-title">
+        <strong>Thông tin</strong>
+        <span class="pill">Tuỳ chọn</span>
+      </div>
+      <div class="small">
+        <div style="display:grid; grid-template-columns: 1fr; gap:10px;">
+          <label style="display:block;">
+            <div class="muted small" style="margin-bottom:6px;">{{ form.full_name.label }}</div>
+            {{ form.full_name }}
+          </label>
+          <label style="display:block;">
+            <div class="muted small" style="margin-bottom:6px;">{{ form.patient_code.label }}</div>
+            {{ form.patient_code }}
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="domain">
+      <div class="domain-title">
         <strong>{{ form.ana_positive.label }}</strong>
       </div>
       {{ form.ana_positive }}

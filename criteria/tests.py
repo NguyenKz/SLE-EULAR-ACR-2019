@@ -149,6 +149,11 @@ class ApiTests(TestCase):
         self.assertIn("summary", payload)
         self.assertIn("results", payload)
 
+    def test_export_pdf_requires_prior_result(self):
+        c = Client()
+        resp = c.get("/export/pdf")
+        self.assertIn(resp.status_code, (400, 500))
+
     def test_api_score_ok(self):
         c = Client()
         resp = c.post(
